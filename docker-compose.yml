@@ -1,0 +1,9 @@
+name: <---projectname---> # change this to your app name
+services:
+  user-service: # change this to your service name
+    container_name: <---container name---> # change this to your service name
+    image: arthurhozanna/<---image---> # change this to your image name
+    ports:
+      - "8001:8001" # change this to your port
+    env_file:
+      - .env
