@@ -39,7 +39,7 @@ func Init() {
 
 	Config = AppConfig{
 		Port:   getEnvAsInt("APP_PORT", 8080),
-		ApiKey: os.Getenv("API_KEY"),
+		ApiKey: os.Getenv("APP_API_KEY"),
 		Database: Database{
 			Host:                  getEnv("DB_HOST", "127.0.0.1"),
 			Port:                  getEnvAsInt("DB_PORT", 5432),

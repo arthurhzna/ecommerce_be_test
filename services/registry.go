@@ -2,7 +2,8 @@ package services
 
 import (
 	"github.com/arthurhzna/ecommerce_be_test/repositories"
-	userService "github.com/arthurhzna/ecommerce_be_test/services/user.go"
+	productService "github.com/arthurhzna/ecommerce_be_test/services/product"
+	userService "github.com/arthurhzna/ecommerce_be_test/services/user"
 )
 
 type Registry struct {
@@ -11,6 +12,7 @@ type Registry struct {
 
 type IServiceRegistry interface {
 	GetUser() userService.IUserService
+	GetProduct() productService.IProductService
 }
 
 func NewServiceRegistry(repository repositories.IRepositoryRegistry) IServiceRegistry {
@@ -19,4 +21,8 @@ func NewServiceRegistry(repository repositories.IRepositoryRegistry) IServiceReg
 
 func (r *Registry) GetUser() userService.IUserService {
 	return userService.NewUserService(r.repository)
+}
+
+func (r *Registry) GetProduct() productService.IProductService {
+	return productService.NewProductService(r.repository)
 }

@@ -90,13 +90,13 @@ func CheckRole(roles []string) gin.HandlerFunc {
 			return
 		}
 
-		user, ok := userClaims.(*dto.Claims)
+		user, ok := userClaims.(*dto.UserResponse)
 		if !ok {
 			responseUnauthorized(c, errConstant.ErrUnauthorized.Error())
 			return
 		}
 
-		if !contains(roles, user.User.Role) {
+		if !contains(roles, user.Role) {
 			responseUnauthorized(c, errConstant.ErrUnauthorized.Error())
 			return
 		}
@@ -156,6 +156,17 @@ func Authenticate() gin.HandlerFunc {
 			return
 		}
 
+		c.Next()
+	}
+}
+
+func AuthenticateWithoutToken() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		err := validateAPIKey(c)
+		if err != nil {
+			responseUnauthorized(c, err.Error())
+			return
+		}
 		c.Next()
 	}
 }
