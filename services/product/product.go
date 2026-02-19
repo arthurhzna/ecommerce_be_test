@@ -34,6 +34,7 @@ func (p *ProductService) GetProductsWithoutPagination(ctx context.Context) (*dto
 			Name:        product.Name,
 			Description: product.Description,
 			Price:       product.Price,
+			Stock:       product.Stock,
 		}
 	}
 	response := dto.ProductListResponse{
@@ -49,6 +50,7 @@ func (p *ProductService) CreateProduct(ctx context.Context, req *dto.CreateProdu
 		Name:        req.Name,
 		Description: req.Description,
 		Price:       req.Price,
+		Stock:       req.Stock,
 	})
 
 	if err != nil {
@@ -60,6 +62,7 @@ func (p *ProductService) CreateProduct(ctx context.Context, req *dto.CreateProdu
 		Name:        product.Name,
 		Description: product.Description,
 		Price:       product.Price,
+		Stock:       product.Stock,
 	}
 
 	return &response, nil

@@ -14,6 +14,7 @@ type Product struct {
 	Name        string    `gorm:"varchar(100);not null"`
 	Description string    `gorm:"varchar(255);not null"`
 	Price       float64   `gorm:"type:numeric(10,2);not null"`
+	Stock       int       `gorm:"not null"`
 
 	CreatedAt *time.Time
 	UpdatedAt *time.Time
