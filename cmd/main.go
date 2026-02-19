@@ -1,7 +1,11 @@
 package cmd
 
 import (
-	"github.com/gin-gonic/gin"
+	"time"
+
+	"github.com/arthurhzna/ecommerce_be_test/config"
+	"github.com/arthurhzna/ecommerce_be_test/database/seeders"
+	"github.com/arthurhzna/ecommerce_be_test/domain/models"
 	"github.com/spf13/cobra"
 )
 
@@ -10,7 +14,31 @@ var command = &cobra.Command{
 	Short: "ecommerce be",
 	Long:  "ecommerce be",
 	Run: func(cmd *cobra.Command, args []string) {
-		gin.Default().Run(":8001")
+		config.Init()
+		db, err := config.InitDatabase()
+		if err != nil {
+			panic(err)
+		}
+
+		loc, err := time.LoadLocation("Asia/Jakarta")
+		if err != nil {
+			panic(err)
+		}
+		time.Local = loc
+
+		err = db.AutoMigrate(
+			&models.Role{},
+			&models.User{},
+		)
+		if err != nil {
+			panic(err)
+		}
+
+		seeders.NewSeederRegistry(db).Run()
+
+		repository := repositories.NewRepositoryRegistry(db)
+		service := services.NewServiceRegistry(repository)
+		controller := controllers.NewControllerRegistry(service)
 	},
 }
 

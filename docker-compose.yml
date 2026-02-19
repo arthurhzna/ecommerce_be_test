@@ -1,9 +1,25 @@
-name: <---projectname---> # change this to your app name
+version: '3.8'
+
 services:
-  user-service: # change this to your service name
-    container_name: <---container name---> # change this to your service name
-    image: arthurhozanna/<---image---> # change this to your image name
+  postgres:
+    image: postgres:15-alpine
+    container_name: golang-template-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-golang_template_db}
+      PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - "8001:8001" # change this to your port
-    env_file:
-      - .env
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-golang_template_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: local
