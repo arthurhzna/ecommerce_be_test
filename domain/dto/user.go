@@ -16,3 +16,25 @@ type UserResponse struct {
 	Email string    `json:"email"`
 	Role  string    `json:"role,omitempty"`
 }
+
+type RegisterRequest struct {
+	Name            string `json:"name" validate:"required"`
+	Password        string `json:"password" validate:"required"`
+	ConfirmPassword string `json:"confirmPassword" validate:"required"`
+	Email           string `json:"email" validate:"required,email"`
+	RoleID          uint
+}
+
+type LoginRequest struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required"`
+}
+
+type RegisterResponse struct {
+	User UserResponse `json:"user"`
+}
+
+type LoginResponse struct {
+	User  UserResponse `json:"user"`
+	Token string       `json:"token"`
+}
