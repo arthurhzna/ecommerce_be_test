@@ -12,7 +12,7 @@ type Order struct {
 	ID        uint                  `gorm:"primaryKey;autoIncrement"`
 	UUID      uuid.UUID             `gorm:"type:uuid;not null"`
 	UserID    uint                  `gorm:"not null"`
-	PaymentID uint                  `gorm:"not null"`
+	PaymentID *uint                 `gorm:"not null"`
 	Amount    float64               `gorm:"type:decimal(10,2);not null"`
 	Status    constants.OrderStatus `gorm:"type:varchar(20);not null"`
 	PaidAt    *time.Time            `gorm:"type:timestamp"`
