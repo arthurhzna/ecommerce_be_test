@@ -167,7 +167,7 @@ flowchart TD
 | Method | Endpoint | Authentication | Role | Description |
 |--------|----------|----------------|------|-------------|
 | GET | `/api/v1/products` | JWT + API Key | Any authenticated | Get all products |
-| POST | `/api/v1/products/create` | JWT + API Key | Admin, Customer | Create new product |
+| POST | `/api/v1/products/create` | JWT + API Key | Admin | Create new product |
 
 ### Order Endpoints
 

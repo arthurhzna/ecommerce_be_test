@@ -24,6 +24,6 @@ func (p *ProductRoute) Run() {
 	group := p.group.Group("/products")
 	group.Use(middlewares.Authenticate())
 	group.GET("", p.controller.GetProduct().GetProductsWithoutPagination)
-	group.Use(middlewares.CheckRole([]string{constants.AdminAuth, constants.CustomerAuth}))
+	group.Use(middlewares.CheckRole([]string{constants.AdminAuth}))
 	group.POST("/create", p.controller.GetProduct().CreateProduct)
 }
