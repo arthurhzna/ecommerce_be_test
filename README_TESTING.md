@@ -1,48 +1,37 @@
 # Testing Guide
 
-Panduan lengkap untuk testing aplikasi Ecommerce BE.
+Complete guide for testing Ecommerce BE application.
 
-## Prerequisites
-
-1. **Dependencies** (sudah termasuk di go.mod)
-   - `github.com/stretchr/testify` - assertions & mocks
-   - `github.com/DATA-DOG/go-sqlmock` - database mocking
-
-2. **Database Test**
-   - PostgreSQL server harus running (untuk integration tests)
-   - Database dibuat **otomatis** saat integration test
-   - Tidak perlu PostgreSQL client tools (psql, createdb, dll)
-
-## Tipe Testing
+## Test Types
 
 ### Unit Tests
-- ✅ Tidak perlu database (menggunakan mock)
+- ✅ No database required (uses mocks)
 - ✅ Test: Repository, Service, Controller
-- ✅ Bisa dijalankan di komputer manapun
-- ✅ Menggunakan `sqlmock` untuk mock database queries
-- ✅ Menggunakan `testify/mock` untuk mock services
+- ✅ Can be run on any computer
+- ✅ Uses `sqlmock` to mock database queries
+- ✅ Uses `testify/mock` to mock services
 
 ### Integration Tests
-- ✅ Perlu PostgreSQL server running
-- ✅ Database dibuat otomatis oleh Go code
+- ✅ Requires PostgreSQL server running
+- ✅ Database is created automatically by Go code
 - ✅ Test end-to-end API endpoints
-- ✅ Menggunakan test database yang terpisah (`ecommerce_test`)
+- ✅ Uses a separate test database (`ecommerce_test`)
 
-## Menjalankan Tests
+## Running Tests
 
-### Semua Tests
+### All Tests
 ```bash
-# Dari root project
+# From project root
 cd be_eco
 go test -v ./...
 ```
 
 ### Unit Tests Only
 ```bash
-# Test semua unit tests (repositories, services, controllers)
+# Test all unit tests (repositories, services, controllers)
 go test -v ./repositories/... ./services/... ./controllers/...
 
-# Atau test per layer
+# Or test per layer
 go test -v ./repositories/...
 go test -v ./services/...
 go test -v ./controllers/...
@@ -50,28 +39,28 @@ go test -v ./controllers/...
 
 ### Integration Tests Only
 ```bash
-# Pastikan PostgreSQL running
+# Make sure PostgreSQL is running
 go test -v ./tests/integration/...
 ```
 
-### Test Package Tertentu
+### Test Specific Package
 ```bash
-# Test controller tertentu
+# Test specific controller
 go test -v ./controllers/product
 go test -v ./controllers/order
 go test -v ./controllers/payment
 go test -v ./controllers/user
 
-# Test service tertentu
+# Test specific service
 go test -v ./services/product
 go test -v ./services/order
 
-# Test repository tertentu
+# Test specific repository
 go test -v ./repositories/product
 go test -v ./repositories/order
 ```
 
-### Test dengan Coverage
+### Test with Coverage
 ```bash
 # Generate coverage report
 go test -v -coverprofile=coverage.out ./...
@@ -80,19 +69,19 @@ go test -v -coverprofile=coverage.out ./...
 go test -v -coverprofile=coverage.out ./...
 go tool cover -html=coverage.out -o coverage.html
 
-# Buka coverage.html di browser
+# Open coverage.html in browser
 ```
 
-### Test dengan Pattern Tertentu
+### Test with Specific Pattern
 ```bash
-# Test yang namanya mengandung "Order"
+# Test whose name contains "Order"
 go test -v -run TestOrder ./...
 
-# Test yang namanya mengandung "Product"
+# Test whose name contains "Product"
 go test -v -run TestProduct ./...
 ```
 
-## Struktur Testing
+## Test Structure
 
 ```
 be_eco/
@@ -162,24 +151,24 @@ be_eco/
    ```
 
 2. **Mock Expectations**: 
-   - Selalu assert `mockRepo.AssertExpectations(t)` untuk unit tests
-   - Setup mock sebelum memanggil function yang di-test
+   - Always assert `mockRepo.AssertExpectations(t)` for unit tests
+   - Setup mock before calling the function being tested
 
 3. **Test Isolation**: 
-   - Setiap test harus independent
-   - Jangan bergantung pada state dari test lain
-   - Gunakan `cleanupTestDatabase()` setelah integration test
+   - Each test must be independent
+   - Don't depend on state from other tests
+   - Use `cleanupTestDatabase()` after integration test
 
 4. **Test Data**:
-   - Gunakan data yang jelas dan konsisten
-   - Hindari hardcoded values yang tidak jelas
-   - Gunakan factory functions untuk create test data
+   - Use clear and consistent data
+   - Avoid unclear hardcoded values
+   - Use factory functions to create test data
 
 5. **Error Testing**:
-   - Test both success dan error cases
-   - Test edge cases (empty data, invalid input, dll)
+   - Test both success and error cases
+   - Test edge cases (empty data, invalid input, etc.)
 
-## Contoh Test
+## Test Examples
 
 ### Unit Test - Repository
 ```go
@@ -268,20 +257,20 @@ func TestLoginUser(t *testing.T) {
 }
 ```
 
-## Testing dengan Docker (Optional)
+## Testing with Docker (Optional)
 
-Jika tidak ada PostgreSQL di host, gunakan Docker:
+If PostgreSQL is not available on the host, use Docker:
 
 ```bash
-# Start PostgreSQL di container (jika ada docker-compose.test.yml)
+# Start PostgreSQL in container (if docker-compose.test.yml exists)
 docker compose -f docker-compose.test.yml up -d postgres-test
 
-# Atau gunakan docker-compose.yml yang ada
+# Or use existing docker-compose.yml
 docker compose up -d postgres
 
 # Set environment variables
 export TEST_DB_HOST=localhost
-export TEST_DB_PORT=5433  # atau port yang sesuai
+export TEST_DB_PORT=5433  # or appropriate port
 export TEST_DB_USER=postgres
 export TEST_DB_PASSWORD=postgres
 export TEST_DB_NAME=ecommerce_test
@@ -293,9 +282,9 @@ go test -v ./tests/integration/...
 docker compose down
 ```
 
-## Environment Variables untuk Testing
+## Environment Variables for Testing
 
-Integration tests menggunakan environment variables berikut (dengan default values):
+Integration tests use the following environment variables (with default values):
 
 ```bash
 TEST_DB_HOST=localhost
@@ -305,40 +294,11 @@ TEST_DB_PASSWORD=postgres
 TEST_DB_NAME=ecommerce_test
 ```
 
-Jika tidak di-set, akan menggunakan default values dari `config/config.go`.
-
-## Troubleshooting
-
-### Error: "Failed to connect to test database"
-- ✅ Pastikan PostgreSQL server running
-- ✅ Check permission CREATE DATABASE untuk user postgres
-- ✅ Verify connection dengan: `psql -h localhost -U postgres -c "SELECT 1"`
-
-### Error: "database does not exist"
-- ✅ Database seharusnya dibuat otomatis oleh `setupTestDatabase()`
-- ✅ Pastikan PostgreSQL server accessible
-- ✅ Check environment variables (TEST_DB_*)
-- ✅ Pastikan user postgres punya permission CREATE DATABASE
-
-### Unit test error tentang database?
-- ✅ Unit test tidak perlu database (menggunakan mock)
-- ✅ Periksa mock setup di test
-- ✅ Pastikan menggunakan `sqlmock` dengan benar
-- ✅ Check `mock.ExpectationsWereMet()` untuk melihat unfulfilled expectations
-
-### Error: "all expectations were already fulfilled"
-- ✅ GORM melakukan Preload queries yang perlu di-mock
-- ✅ Tambahkan mock expectations untuk Preload queries
-- ✅ Atau gunakan `sqlmock.AnyArg()` untuk arguments yang fleksibel
-
-### Error: "arguments do not match"
-- ✅ GORM First() menggunakan LIMIT yang menghasilkan 2 arguments
-- ✅ Gunakan `sqlmock.AnyArg()` untuk arguments yang tidak pasti
-- ✅ Atau match exact arguments sesuai dengan query GORM
+If not set, will use default values from `config/config.go`.
 
 ## Test Statistics
 
-Jalankan test untuk melihat statistik:
+Run tests to see statistics:
 
 ```bash
 go test -v ./... 2>&1 | grep -E "(PASS|FAIL|ok)"
@@ -350,11 +310,3 @@ go test -v ./... 2>&1 | grep -E "(PASS|FAIL|ok)"
 - [Testify Documentation](https://github.com/stretchr/testify)
 - [SQLMock Documentation](https://github.com/DATA-DOG/go-sqlmock)
 - [GORM Testing](https://gorm.io/docs/testing.html)
-
-## Notes
-
-- Unit tests menggunakan mock, jadi tidak perlu database
-- Integration tests memerlukan PostgreSQL server running
-- Database test dibuat otomatis, tidak perlu setup manual
-- Semua test harus independent dan bisa dijalankan secara parallel
-- Gunakan `-short` flag untuk skip integration tests: `go test -short ./...`
