@@ -9,7 +9,7 @@ Backend API for ecommerce application built with Go, Gin, GORM, and PostgreSQL.
 ```bash
 # Clone repository
 git clone <repository-url>
-cd be_eco
+cd ecommerce_be_test
 
 # Create .env file
 cp .env.example .env
@@ -33,7 +33,7 @@ docker compose up -d
 ```bash
 # Clone repository
 git clone <repository-url>
-cd be_eco
+cd ecommerce_be_test
 
 # Install dependencies
 go mod download
