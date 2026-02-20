@@ -48,12 +48,28 @@ make run
 ### Testing
 
 ```bash
-make test-unit        # Unit tests (no database required)
-make test-integration # Integration tests (database created automatically)
-make test-all         # Run all tests
+# Run all tests
+go test -v ./...
+
+# Unit tests only (no database required)
+go test -v ./repositories/... ./services/... ./controllers/...
+
+# Integration tests only (database created automatically)
+go test -v ./tests/integration/...
+
+# With coverage report
+go test -v -coverprofile=coverage.out ./...
+go tool cover -html=coverage.out -o coverage.html
 ```
 
-> 💡 Test database is created **automatically** during integration tests.
+> 💡 **Test database is created automatically** during integration tests.  
+> 📖 For detailed testing guide, see [README_TESTING.md](README_TESTING.md)
+
+**Test Coverage:**
+- ✅ **Controllers**: Order, Payment, Product, User
+- ✅ **Services**: Order, Payment, Product, User  
+- ✅ **Repositories**: Order, OrderItem, Payment, Product, User
+- ✅ **Integration Tests**: All API endpoints
 
 ## Available Commands
 
@@ -65,9 +81,10 @@ make swagger          # Generate Swagger docs
 
 # Testing
 make test             # Run all tests
-make test-unit        # Unit tests only
-make test-integration # Integration tests only
-make test-coverage    # Coverage report
+make test-unit        # Unit tests only (no database required)
+make test-integration # Integration tests only (database created automatically)
+make test-coverage    # Coverage report (generates coverage.html)
+```
 ```
 
 ## Application Architecture

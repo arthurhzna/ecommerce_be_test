@@ -20,6 +20,7 @@ import (
 	"github.com/arthurhzna/ecommerce_be_test/services"
 	"github.com/arthurhzna/ecommerce_be_test/tests/helpers"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -421,6 +422,325 @@ func TestCreateProduct(t *testing.T) {
 			testRouter.ServeHTTP(w, req)
 
 			assert.Equal(t, tt.expectedStatus, w.Code)
+		})
+	}
+}
+
+func TestCreateOrder(t *testing.T) {
+	cleanupTestDatabase(testDB)
+	helpers.SeedTestData(t, testDB)
+	seeders.RunUserSeeder(testDB)
+
+	// Create product
+	product := models.Product{
+		UUID:        uuid.New(),
+		Name:        "Test Product",
+		Description: "Test Description",
+		Price:       100.00,
+		Stock:       10,
+	}
+	testDB.Create(&product)
+
+	// Register and login as customer
+	registerPayload := map[string]interface{}{
+		"name":            "Order Test User",
+		"email":           "ordertest@example.com",
+		"password":        "password123",
+		"confirmPassword": "password123",
+	}
+	jsonValue, _ := json.Marshal(registerPayload)
+	req, _ := http.NewRequest("POST", "/api/v1/auth/register", bytes.NewBuffer(jsonValue))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Api-Key", config.Config.ApiKey)
+	w := httptest.NewRecorder()
+	testRouter.ServeHTTP(w, req)
+
+	loginPayload := map[string]interface{}{
+		"email":    "ordertest@example.com",
+		"password": "password123",
+	}
+	jsonValue, _ = json.Marshal(loginPayload)
+	req, _ = http.NewRequest("POST", "/api/v1/auth/login", bytes.NewBuffer(jsonValue))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Api-Key", config.Config.ApiKey)
+	w = httptest.NewRecorder()
+	testRouter.ServeHTTP(w, req)
+
+	var loginResponse map[string]interface{}
+	json.Unmarshal(w.Body.Bytes(), &loginResponse)
+	token, ok := loginResponse["token"].(string)
+	if !ok {
+		t.Fatal("Failed to get token for order test")
+	}
+
+	tests := []struct {
+		name           string
+		payload        map[string]interface{}
+		expectedStatus int
+	}{
+		{
+			name: "success create order",
+			payload: map[string]interface{}{
+				"items": []map[string]interface{}{
+					{
+						"productUUID": product.UUID.String(),
+						"quantity":    2,
+					},
+				},
+			},
+			expectedStatus: http.StatusCreated,
+		},
+		{
+			name: "invalid payload - empty items",
+			payload: map[string]interface{}{
+				"items": []map[string]interface{}{},
+			},
+			expectedStatus: http.StatusUnprocessableEntity,
+		},
+		{
+			name: "invalid payload - invalid quantity",
+			payload: map[string]interface{}{
+				"items": []map[string]interface{}{
+					{
+						"productUUID": product.UUID.String(),
+						"quantity":    0,
+					},
+				},
+			},
+			expectedStatus: http.StatusUnprocessableEntity,
+		},
+		{
+			name: "insufficient stock",
+			payload: map[string]interface{}{
+				"items": []map[string]interface{}{
+					{
+						"productUUID": product.UUID.String(),
+						"quantity":    100,
+					},
+				},
+			},
+			expectedStatus: http.StatusBadRequest,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			jsonValue, _ := json.Marshal(tt.payload)
+			req, _ := http.NewRequest("POST", "/api/v1/orders", bytes.NewBuffer(jsonValue))
+			req.Header.Set("Content-Type", "application/json")
+			req.Header.Set("Api-Key", config.Config.ApiKey)
+			req.Header.Set("Authorization", "Bearer "+token)
+
+			w := httptest.NewRecorder()
+			testRouter.ServeHTTP(w, req)
+
+			assert.Equal(t, tt.expectedStatus, w.Code)
+
+			if tt.expectedStatus == http.StatusCreated {
+				var response map[string]interface{}
+				json.Unmarshal(w.Body.Bytes(), &response)
+				assert.Equal(t, "success", response["status"])
+				assert.NotNil(t, response["data"])
+			}
+		})
+	}
+}
+
+func TestGetMyOrders(t *testing.T) {
+	cleanupTestDatabase(testDB)
+	helpers.SeedTestData(t, testDB)
+	seeders.RunUserSeeder(testDB)
+
+	product := models.Product{
+		UUID:        uuid.New(),
+		Name:        "Test Product",
+		Description: "Test Description",
+		Price:       100.00,
+		Stock:       10,
+	}
+	testDB.Create(&product)
+
+	registerPayload := map[string]interface{}{
+		"name":            "Order List User",
+		"email":           "orderlist@example.com",
+		"password":        "password123",
+		"confirmPassword": "password123",
+	}
+	jsonValue, _ := json.Marshal(registerPayload)
+	req, _ := http.NewRequest("POST", "/api/v1/auth/register", bytes.NewBuffer(jsonValue))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Api-Key", config.Config.ApiKey)
+	w := httptest.NewRecorder()
+	testRouter.ServeHTTP(w, req)
+
+	loginPayload := map[string]interface{}{
+		"email":    "orderlist@example.com",
+		"password": "password123",
+	}
+	jsonValue, _ = json.Marshal(loginPayload)
+	req, _ = http.NewRequest("POST", "/api/v1/auth/login", bytes.NewBuffer(jsonValue))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Api-Key", config.Config.ApiKey)
+	w = httptest.NewRecorder()
+	testRouter.ServeHTTP(w, req)
+
+	var loginResponse map[string]interface{}
+	json.Unmarshal(w.Body.Bytes(), &loginResponse)
+	token, ok := loginResponse["token"].(string)
+	if !ok {
+		t.Fatal("Failed to get token for order list test")
+	}
+
+	orderPayload := map[string]interface{}{
+		"items": []map[string]interface{}{
+			{
+				"productUUID": product.UUID.String(),
+				"quantity":    1,
+			},
+		},
+	}
+	jsonValue, _ = json.Marshal(orderPayload)
+	req, _ = http.NewRequest("POST", "/api/v1/orders", bytes.NewBuffer(jsonValue))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Api-Key", config.Config.ApiKey)
+	req.Header.Set("Authorization", "Bearer "+token)
+	w = httptest.NewRecorder()
+	testRouter.ServeHTTP(w, req)
+
+	req, _ = http.NewRequest("GET", "/api/v1/orders/my", nil)
+	req.Header.Set("Api-Key", config.Config.ApiKey)
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	w = httptest.NewRecorder()
+	testRouter.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var response map[string]interface{}
+	json.Unmarshal(w.Body.Bytes(), &response)
+	assert.Equal(t, "success", response["status"])
+	assert.NotNil(t, response["data"])
+}
+
+func TestProcessPayment(t *testing.T) {
+	cleanupTestDatabase(testDB)
+	helpers.SeedTestData(t, testDB)
+	seeders.RunUserSeeder(testDB)
+
+	product := models.Product{
+		UUID:        uuid.New(),
+		Name:        "Test Product",
+		Description: "Test Description",
+		Price:       100.00,
+		Stock:       10,
+	}
+	testDB.Create(&product)
+
+	registerPayload := map[string]interface{}{
+		"name":            "Payment Test User",
+		"email":           "paymenttest@example.com",
+		"password":        "password123",
+		"confirmPassword": "password123",
+	}
+	jsonValue, _ := json.Marshal(registerPayload)
+	req, _ := http.NewRequest("POST", "/api/v1/auth/register", bytes.NewBuffer(jsonValue))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Api-Key", config.Config.ApiKey)
+	w := httptest.NewRecorder()
+	testRouter.ServeHTTP(w, req)
+
+	loginPayload := map[string]interface{}{
+		"email":    "paymenttest@example.com",
+		"password": "password123",
+	}
+	jsonValue, _ = json.Marshal(loginPayload)
+	req, _ = http.NewRequest("POST", "/api/v1/auth/login", bytes.NewBuffer(jsonValue))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Api-Key", config.Config.ApiKey)
+	w = httptest.NewRecorder()
+	testRouter.ServeHTTP(w, req)
+
+	var loginResponse map[string]interface{}
+	json.Unmarshal(w.Body.Bytes(), &loginResponse)
+	token, ok := loginResponse["token"].(string)
+	if !ok {
+		t.Fatal("Failed to get token for payment test")
+	}
+
+	orderPayload := map[string]interface{}{
+		"items": []map[string]interface{}{
+			{
+				"productUUID": product.UUID.String(),
+				"quantity":    1,
+			},
+		},
+	}
+	jsonValue, _ = json.Marshal(orderPayload)
+	req, _ = http.NewRequest("POST", "/api/v1/orders", bytes.NewBuffer(jsonValue))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Api-Key", config.Config.ApiKey)
+	req.Header.Set("Authorization", "Bearer "+token)
+	w = httptest.NewRecorder()
+	testRouter.ServeHTTP(w, req)
+
+	var orderResponse map[string]interface{}
+	json.Unmarshal(w.Body.Bytes(), &orderResponse)
+
+	if orderResponse["status"] != "success" {
+		t.Logf("Order creation failed: %v", orderResponse)
+		t.Fatal("Failed to create order for payment test")
+	}
+
+	orderData, ok := orderResponse["data"].(map[string]interface{})
+	if !ok {
+		t.Logf("Order response: %v", orderResponse)
+		t.Fatal("Failed to get order data")
+	}
+	orderUUID, ok := orderData["uuid"].(string)
+	if !ok {
+		t.Logf("Order data: %v", orderData)
+		t.Fatal("Failed to get order UUID")
+	}
+
+	tests := []struct {
+		name           string
+		orderUUID      string
+		payload        map[string]interface{}
+		expectedStatus int
+	}{
+		{
+			name:           "success process payment",
+			orderUUID:      orderUUID,
+			payload:        map[string]interface{}{},
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name:           "invalid uuid format",
+			orderUUID:      "invalid-uuid",
+			payload:        map[string]interface{}{},
+			expectedStatus: http.StatusBadRequest,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			jsonValue, _ := json.Marshal(tt.payload)
+			req, _ := http.NewRequest("POST", "/api/v1/payments/"+tt.orderUUID+"/pay", bytes.NewBuffer(jsonValue))
+			req.Header.Set("Content-Type", "application/json")
+			req.Header.Set("Api-Key", config.Config.ApiKey)
+			req.Header.Set("Authorization", "Bearer "+token)
+
+			w := httptest.NewRecorder()
+			testRouter.ServeHTTP(w, req)
+
+			assert.Equal(t, tt.expectedStatus, w.Code)
+
+			if tt.expectedStatus == http.StatusOK {
+				var response map[string]interface{}
+				json.Unmarshal(w.Body.Bytes(), &response)
+				assert.Equal(t, "success", response["status"])
+				assert.NotNil(t, response["data"])
+			}
 		})
 	}
 }

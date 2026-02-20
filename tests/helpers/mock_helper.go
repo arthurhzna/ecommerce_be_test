@@ -83,16 +83,105 @@ func (m *MockProductRepository) UpdateStock(ctx context.Context, productID uint,
 	return args.Error(0)
 }
 
+type MockOrderRepository struct {
+	mock.Mock
+}
+
+func (m *MockOrderRepository) Create(ctx context.Context, order *models.Order) (*models.Order, error) {
+	args := m.Called(ctx, order)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*models.Order), args.Error(1)
+}
+
+func (m *MockOrderRepository) FindByUserID(ctx context.Context, userID uint) ([]models.Order, error) {
+	args := m.Called(ctx, userID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]models.Order), args.Error(1)
+}
+
+func (m *MockOrderRepository) FindByID(ctx context.Context, id uint) (*models.Order, error) {
+	args := m.Called(ctx, id)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*models.Order), args.Error(1)
+}
+
+func (m *MockOrderRepository) FindByUUID(ctx context.Context, orderUUID uuid.UUID) (*models.Order, error) {
+	args := m.Called(ctx, orderUUID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*models.Order), args.Error(1)
+}
+
+func (m *MockOrderRepository) Update(ctx context.Context, order *models.Order) error {
+	args := m.Called(ctx, order)
+	return args.Error(0)
+}
+
+type MockOrderItemRepository struct {
+	mock.Mock
+}
+
+func (m *MockOrderItemRepository) CreateBulk(ctx context.Context, items []*models.OrderItem) error {
+	args := m.Called(ctx, items)
+	return args.Error(0)
+}
+
+func (m *MockOrderItemRepository) FindByOrderID(ctx context.Context, orderID uint) ([]models.OrderItem, error) {
+	args := m.Called(ctx, orderID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]models.OrderItem), args.Error(1)
+}
+
+type MockPaymentRepository struct {
+	mock.Mock
+}
+
+func (m *MockPaymentRepository) Create(ctx context.Context, payment *models.Payment) (*models.Payment, error) {
+	args := m.Called(ctx, payment)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*models.Payment), args.Error(1)
+}
+
+func (m *MockPaymentRepository) FindByOrderID(ctx context.Context, orderID uint) (*models.Payment, error) {
+	args := m.Called(ctx, orderID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*models.Payment), args.Error(1)
+}
+
+func (m *MockPaymentRepository) Update(ctx context.Context, payment *models.Payment) error {
+	args := m.Called(ctx, payment)
+	return args.Error(0)
+}
+
 type MockRepositoryRegistry struct {
 	mock.Mock
-	UserRepo    *MockUserRepository
-	ProductRepo *MockProductRepository
+	UserRepo      *MockUserRepository
+	ProductRepo   *MockProductRepository
+	OrderRepo     *MockOrderRepository
+	OrderItemRepo *MockOrderItemRepository
+	PaymentRepo   *MockPaymentRepository
 }
 
 func NewMockRepositoryRegistry() *MockRepositoryRegistry {
 	return &MockRepositoryRegistry{
-		UserRepo:    new(MockUserRepository),
-		ProductRepo: new(MockProductRepository),
+		UserRepo:      new(MockUserRepository),
+		ProductRepo:   new(MockProductRepository),
+		OrderRepo:     new(MockOrderRepository),
+		OrderItemRepo: new(MockOrderItemRepository),
+		PaymentRepo:   new(MockPaymentRepository),
 	}
 }
 
@@ -105,13 +194,13 @@ func (m *MockRepositoryRegistry) GetProduct() productRepo.IProductRepository {
 }
 
 func (m *MockRepositoryRegistry) GetOrder() orderRepo.IOrderRepository {
-	return nil
+	return m.OrderRepo
 }
 
 func (m *MockRepositoryRegistry) GetOrderItem() orderItemRepo.IOrderItemRepository {
-	return nil
+	return m.OrderItemRepo
 }
 
 func (m *MockRepositoryRegistry) GetPayment() paymentRepo.IPaymentRepository {
-	return nil
+	return m.PaymentRepo
 }
