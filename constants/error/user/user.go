@@ -14,5 +14,6 @@ var UserErrors = []error{
 	ErrUserNotFound,
 	ErrPasswordInCorrect,
 	ErrUsernameExist,
+	ErrEmailExist,
 	ErrPasswordDoesNotMatch,
 }

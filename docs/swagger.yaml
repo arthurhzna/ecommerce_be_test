@@ -1,0 +1,462 @@
+basePath: /api/v1
+definitions:
+  dto.CreateOrderRequest:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/dto.OrderItemRequest'
+        minItems: 1
+        type: array
+    required:
+    - items
+    type: object
+  dto.CreateProductRequest:
+    properties:
+      description:
+        maxLength: 255
+        minLength: 10
+        type: string
+      name:
+        maxLength: 100
+        minLength: 3
+        type: string
+      price:
+        type: number
+      stock:
+        minimum: 0
+        type: integer
+    required:
+    - description
+    - name
+    - price
+    - stock
+    type: object
+  dto.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  dto.LoginResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/dto.UserResponse'
+    type: object
+  dto.OrderItemRequest:
+    properties:
+      productUUID:
+        type: string
+      quantity:
+        type: integer
+    required:
+    - productUUID
+    - quantity
+    type: object
+  dto.OrderItemResponse:
+    properties:
+      price:
+        type: number
+      productId:
+        type: integer
+      productName:
+        type: string
+      quantity:
+        type: integer
+      subtotal:
+        type: number
+      uuid:
+        type: string
+    type: object
+  dto.OrderResponse:
+    properties:
+      amount:
+        type: number
+      createdAt:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/dto.OrderItemResponse'
+        type: array
+      paidAt:
+        type: string
+      status:
+        type: string
+      userId:
+        type: integer
+      uuid:
+        type: string
+    type: object
+  dto.PaymentRequest:
+    type: object
+  dto.PaymentResponse:
+    properties:
+      amount:
+        type: number
+      createdAt:
+        type: string
+      orderId:
+        type: integer
+      paidAt:
+        type: string
+      status:
+        type: string
+      transactionId:
+        type: string
+      uuid:
+        type: string
+    type: object
+  dto.ProductResponse:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      stock:
+        type: integer
+      uuid:
+        type: string
+    type: object
+  dto.RegisterRequest:
+    properties:
+      confirmPassword:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    required:
+    - confirmPassword
+    - email
+    - name
+    - password
+    type: object
+  dto.RegisterResponse:
+    properties:
+      user:
+        $ref: '#/definitions/dto.UserResponse'
+    type: object
+  dto.UserResponse:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      role:
+        type: string
+      uuid:
+        type: string
+    type: object
+  response.Response:
+    properties:
+      data: {}
+      message: {}
+      status:
+        type: string
+      token:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+  description: This is a sample ecommerce backend API server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Ecommerce BE Test API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Login with email and password
+      parameters:
+      - description: Login Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.LoginResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Login user
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new customer account
+      parameters:
+      - description: Register Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.RegisterResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Register new user
+      tags:
+      - Auth
+  /orders:
+    post:
+      consumes:
+      - application/json
+      description: Create a new order with product items (Customer only)
+      parameters:
+      - description: Create Order Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.OrderResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth: []
+      summary: Create new order
+      tags:
+      - Orders
+  /orders/my:
+    get:
+      consumes:
+      - application/json
+      description: Get list of orders for the authenticated user (Customer only)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.OrderResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth: []
+      summary: Get my orders
+      tags:
+      - Orders
+  /payments/{orderUUID}/pay:
+    post:
+      consumes:
+      - application/json
+      description: Process payment for an order (Customer only)
+      parameters:
+      - description: Order UUID
+        in: path
+        name: orderUUID
+        required: true
+        type: string
+      - description: Payment Request (optional)
+        in: body
+        name: request
+        schema:
+          $ref: '#/definitions/dto.PaymentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.PaymentResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth: []
+      summary: Process payment
+      tags:
+      - Payments
+  /products:
+    get:
+      consumes:
+      - application/json
+      description: Get list of all products
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.ProductResponse'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth: []
+      summary: Get all products
+      tags:
+      - Products
+  /products/create:
+    post:
+      consumes:
+      - application/json
+      description: Create a new product (Admin only)
+      parameters:
+      - description: Create Product Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateProductRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ProductResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Response'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth: []
+      summary: Create new product
+      tags:
+      - Products
+securityDefinitions:
+  ApiKeyAuth:
+    description: API Key Authentication
+    in: header
+    name: Api-Key
+    type: apiKey
+  BearerAuth:
+    description: 'JWT Bearer Token Authentication. Format: "Bearer {token}"'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

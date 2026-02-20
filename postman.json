@@ -1,1 +1,389 @@
-
+{
+	"info": {
+		"_postman_id": "ecommerce-be-api",
+		"name": "Ecommerce BE API",
+		"description": "API collection for Ecommerce Backend - Admin & Customer",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Login Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.token) {",
+									"        pm.collectionVariables.set(\"adminToken\", jsonData.token);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Api-Key",
+								"value": "ganbatte",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@gmail.com\",\n  \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "auth", "login"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login Customer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.token) {",
+									"        pm.collectionVariables.set(\"customerToken\", jsonData.token);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Api-Key",
+								"value": "ganbatte",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"customer@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "auth", "login"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Api-Key",
+								"value": "ganbatte",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\",\n  \"confirmPassword\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "auth", "register"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "Products",
+					"item": [
+						{
+							"name": "Get All Products",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{adminToken}}",
+										"type": "text"
+									},
+									{
+										"key": "Api-Key",
+										"value": "ganbatte",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/products",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "v1", "products"]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create Product",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{adminToken}}",
+										"type": "text"
+									},
+									{
+										"key": "Api-Key",
+										"value": "ganbatte",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Laptop Gaming\",\n  \"description\": \"Laptop gaming dengan spesifikasi tinggi untuk gaming dan productivity\",\n  \"price\": 15000000,\n  \"stock\": 20\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/products/create",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "v1", "products", "create"]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Customer",
+			"item": [
+				{
+					"name": "Products",
+					"item": [
+						{
+							"name": "Get All Products",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{customerToken}}",
+										"type": "text"
+									},
+									{
+										"key": "Api-Key",
+										"value": "ganbatte",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/products",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "v1", "products"]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create Product",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{customerToken}}",
+										"type": "text"
+									},
+									{
+										"key": "Api-Key",
+										"value": "ganbatte",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Laptop Gaming\",\n  \"description\": \"Laptop gaming dengan spesifikasi tinggi untuk gaming dan productivity\",\n  \"price\": 15000000,\n  \"stock\": 20\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/products/create",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "v1", "products", "create"]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Orders",
+					"item": [
+						{
+							"name": "Create Order",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{customerToken}}",
+										"type": "text"
+									},
+									{
+										"key": "Api-Key",
+										"value": "ganbatte",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"items\": [\n    {\n      \"productUUID\": \"da7f0dc1-1d55-427e-ac38-99d42ae28a29\",\n      \"quantity\": 2\n    },\n    {\n      \"productUUID\": \"6ecfd7ee-afc2-4104-8c0d-649aadbc822c\",\n      \"quantity\": 1\n    }\n  ]\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/orders",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "v1", "orders"]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get My Orders",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{customerToken}}",
+										"type": "text"
+									},
+									{
+										"key": "Api-Key",
+										"value": "ganbatte",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/orders/my",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "v1", "orders", "my"]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Payments",
+					"item": [
+						{
+							"name": "Process Payment",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{customerToken}}",
+										"type": "text"
+									},
+									{
+										"key": "Api-Key",
+										"value": "ganbatte",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/payments/:orderUUID/pay",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "v1", "payments", ":orderUUID", "pay"],
+									"variable": [
+										{
+											"key": "orderUUID",
+											"value": "716f4fb0-30e8-453e-8c57-c78f9dbc672c",
+											"type": "string"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "adminToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "customerToken",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

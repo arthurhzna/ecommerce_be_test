@@ -3,6 +3,7 @@ package product
 import (
 	"context"
 
+	errProduct "github.com/arthurhzna/ecommerce_be_test/constants/error/product"
 	"github.com/arthurhzna/ecommerce_be_test/domain/dto"
 	"github.com/arthurhzna/ecommerce_be_test/domain/models"
 	"github.com/arthurhzna/ecommerce_be_test/repositories"
@@ -45,6 +46,10 @@ func (p *ProductService) GetProductsWithoutPagination(ctx context.Context) (*dto
 }
 
 func (p *ProductService) CreateProduct(ctx context.Context, req *dto.CreateProductRequest) (*dto.ProductResponse, error) {
+	existingProduct, err := p.repository.GetProduct().FindByName(ctx, req.Name)
+	if err == nil && existingProduct != nil {
+		return nil, errProduct.ErrProductNameAlreadyExist
+	}
 
 	product, err := p.repository.GetProduct().Create(ctx, &models.Product{
 		Name:        req.Name,

@@ -24,6 +24,17 @@ func NewUserController(service services.IServiceRegistry) IUserController {
 	return &UserController{service: service}
 }
 
+// Login godoc
+// @Summary      Login user
+// @Description  Login with email and password
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        request  body  dto.LoginRequest  true  "Login Request"
+// @Success      200      {object}  response.Response{data=dto.LoginResponse}
+// @Failure      400      {object}  response.Response
+// @Failure      422      {object}  response.Response
+// @Router       /auth/login [post]
 func (u *UserController) Login(ctx *gin.Context) {
 	request := &dto.LoginRequest{}
 
@@ -70,6 +81,17 @@ func (u *UserController) Login(ctx *gin.Context) {
 	})
 }
 
+// Register godoc
+// @Summary      Register new user
+// @Description  Register a new customer account
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        request  body  dto.RegisterRequest  true  "Register Request"
+// @Success      200      {object}  response.Response{data=dto.RegisterResponse}
+// @Failure      400      {object}  response.Response
+// @Failure      422      {object}  response.Response
+// @Router       /auth/register [post]
 func (u *UserController) Register(ctx *gin.Context) {
 	request := &dto.RegisterRequest{}
 

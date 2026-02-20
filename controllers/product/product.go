@@ -23,6 +23,18 @@ func NewProductController(service services.IServiceRegistry) IProductController 
 	return &ProductController{service: service}
 }
 
+// GetProductsWithoutPagination godoc
+// @Summary      Get all products
+// @Description  Get list of all products
+// @Tags         Products
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Security     BearerAuth
+// @Success      200  {object}  response.Response{data=[]dto.ProductResponse}
+// @Failure      401  {object}  response.Response
+// @Failure      500  {object}  response.Response
+// @Router       /products [get]
 func (p *ProductController) GetProductsWithoutPagination(ctx *gin.Context) {
 	products, err := p.service.GetProduct().GetProductsWithoutPagination(ctx)
 	if err != nil {
@@ -41,6 +53,22 @@ func (p *ProductController) GetProductsWithoutPagination(ctx *gin.Context) {
 	})
 }
 
+// CreateProduct godoc
+// @Summary      Create new product
+// @Description  Create a new product (Admin only)
+// @Tags         Products
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Security     BearerAuth
+// @Param        request  body  dto.CreateProductRequest  true  "Create Product Request"
+// @Success      201      {object}  response.Response{data=dto.ProductResponse}
+// @Failure      400      {object}  response.Response
+// @Failure      401      {object}  response.Response
+// @Failure      403      {object}  response.Response
+// @Failure      422      {object}  response.Response
+// @Failure      500      {object}  response.Response
+// @Router       /products/create [post]
 func (p *ProductController) CreateProduct(ctx *gin.Context) {
 	request := &dto.CreateProductRequest{}
 

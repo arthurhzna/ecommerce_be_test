@@ -22,7 +22,8 @@ func NewProductRoute(controller controllers.IControllerRegistry, group *gin.Rout
 
 func (p *ProductRoute) Run() {
 	group := p.group.Group("/products")
-	group.GET("", middlewares.AuthenticateWithoutToken(), p.controller.GetProduct().GetProductsWithoutPagination)
 	group.Use(middlewares.Authenticate())
-	group.POST("/create", middlewares.CheckRole([]string{constants.AdminAuth}), p.controller.GetProduct().CreateProduct)
+	group.GET("", p.controller.GetProduct().GetProductsWithoutPagination)
+	group.Use(middlewares.CheckRole([]string{constants.AdminAuth, constants.CustomerAuth}))
+	group.POST("/create", p.controller.GetProduct().CreateProduct)
 }

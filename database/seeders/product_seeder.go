@@ -14,6 +14,7 @@ func RunProductSeeder(db *gorm.DB) {
 		Name:        "Laptop Lenovo",
 		Description: "Laptop Lenovo ThinkPad X1 Carbon",
 		Price:       10000000,
+		Stock:       10,
 	}
 
 	err := db.FirstOrCreate(&product, models.Product{Name: product.Name}).Error

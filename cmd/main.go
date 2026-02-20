@@ -1,3 +1,26 @@
+// @title           Ecommerce BE Test API
+// @version         1.0
+// @description     This is a sample ecommerce backend API server.
+// @termsOfService  http://swagger.io/terms/
+
+// @contact.name   API Support
+// @contact.email  support@example.com
+
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host      localhost:8080
+// @BasePath  /api/v1
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Api-Key
+// @description API Key Authentication
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description JWT Bearer Token Authentication. Format: "Bearer {token}"
 package cmd
 
 import (
@@ -19,6 +42,11 @@ import (
 	"github.com/didip/tollbooth/limiter"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	_ "github.com/arthurhzna/ecommerce_be_test/docs"
 )
 
 var command = &cobra.Command{
@@ -42,7 +70,11 @@ var command = &cobra.Command{
 			&models.Role{},
 			&models.User{},
 			&models.Product{},
+			&models.Order{},
+			&models.OrderItem{},
+			&models.Payment{},
 		)
+
 		if err != nil {
 			panic(err)
 		}
@@ -55,6 +87,10 @@ var command = &cobra.Command{
 
 		router := gin.Default()
 		router.Use(middlewares.HandlePanic())
+
+		// Swagger route - PUBLIC
+		router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 		router.NoRoute(func(c *gin.Context) {
 			c.JSON(http.StatusNotFound, response.Response{
 				Status:  constants.Error,

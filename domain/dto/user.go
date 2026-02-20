@@ -22,7 +22,7 @@ type RegisterRequest struct {
 	Password        string `json:"password" validate:"required"`
 	ConfirmPassword string `json:"confirmPassword" validate:"required"`
 	Email           string `json:"email" validate:"required,email"`
-	RoleID          uint
+	RoleID          uint   `json:"-"`
 }
 
 type LoginRequest struct {

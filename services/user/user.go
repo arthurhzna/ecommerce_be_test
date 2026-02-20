@@ -9,6 +9,7 @@ import (
 	"github.com/arthurhzna/ecommerce_be_test/constants"
 	errUser "github.com/arthurhzna/ecommerce_be_test/constants/error/user"
 	"github.com/arthurhzna/ecommerce_be_test/domain/dto"
+	"github.com/arthurhzna/ecommerce_be_test/domain/models"
 	"github.com/arthurhzna/ecommerce_be_test/repositories"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
@@ -21,6 +22,7 @@ type UserService struct {
 type IUserService interface {
 	Login(context.Context, *dto.LoginRequest) (*dto.LoginResponse, error)
 	Register(context.Context, *dto.RegisterRequest) (*dto.RegisterResponse, error)
+	GetUserByEmail(context.Context, string) (*models.User, error)
 }
 
 func NewUserService(repository repositories.IRepositoryRegistry) IUserService {
@@ -73,7 +75,8 @@ func (u *UserService) Register(ctx context.Context, req *dto.RegisterRequest) (*
 		return nil, err
 	}
 
-	if u.isEmailExist(ctx, req.Email) {
+	userModel, err := u.repository.GetUser().FindByEmail(ctx, req.Email)
+	if err == nil && userModel != nil {
 		return nil, errUser.ErrEmailExist
 	}
 
@@ -102,15 +105,6 @@ func (u *UserService) Register(ctx context.Context, req *dto.RegisterRequest) (*
 	return response, nil
 }
 
-func (u *UserService) isEmailExist(ctx context.Context, email string) bool {
-	user, err := u.repository.GetUser().FindByEmail(ctx, email)
-	if err != nil {
-		return false
-	}
-
-	if user != nil {
-		return true
-	}
-
-	return false
+func (u *UserService) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
+	return u.repository.GetUser().FindByEmail(ctx, email)
 }
