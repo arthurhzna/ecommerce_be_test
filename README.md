@@ -85,7 +85,6 @@ make test-unit        # Unit tests only (no database required)
 make test-integration # Integration tests only (database created automatically)
 make test-coverage    # Coverage report (generates coverage.html)
 ```
-```
 
 ## Application Architecture
 
@@ -95,10 +94,10 @@ make test-coverage    # Coverage report (generates coverage.html)
 flowchart TD
     Start([Client Request]) --> Router[Gin Router]
     
-    Router --> MW1[Panic Handler<br/>Recover from panics]
-    MW1 --> MW2[CORS Middleware<br/>Cross-origin support]
-    MW2 --> MW3[Rate Limiter<br/>Request throttling]
-    MW3 --> MW4{Authentication<br/>Required?}
+    Router --> MW1[Panic Handler]
+    MW1 --> MW2[CORS Middleware]
+    MW2 --> MW3[Rate Limiter]
+    MW3 --> MW4{Authentication Required?}
     
     MW4 -->|Public| Auth1[API Key Only]
     MW4 -->|Protected| Auth2[JWT + API Key]
@@ -130,13 +129,6 @@ flowchart TD
     R4 --> DB
     
     DB --> Response([JSON Response])
-    
-    style Start fill:#e1f5ff
-    style Router fill:#fff4e1
-    style MW4 fill:#ffe1f5
-    style Routes fill:#e1ffe1
-    style DB fill:#f0e1ff
-    style Response fill:#e1f5ff
 ```
 
 ### Layer Architecture
@@ -443,14 +435,3 @@ docker run -d \
 
 - **[Testing Guide](README_TESTING.md)** - Testing documentation
 - **Swagger Docs** - `http://localhost:8080/swagger/index.html`
-
-## FAQ
-
-**Q: Do I need to install PostgreSQL client tools (psql, createdb)?**  
-A: No. The test database is created automatically by Go code. However, **PostgreSQL server must be running** for integration tests.
-
-**Q: Do unit tests need a database?**  
-A: No. Unit tests use mocks and don't require a database.
-
-**Q: Testing with Docker?**  
-A: See [Testing Guide](README_TESTING.md) for details.
